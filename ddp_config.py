@@ -13,7 +13,8 @@ def prettify(elem):
     reparsed = minidom.parseString(rough_string)
     return reparsed.toprettyxml(indent="  ")
 
-def create_xml_5_1_atmos(output_path, atmos_file, mp4_file, data_rate, xml_filename):
+def create_xml_5_1_atmos(output_path, atmos_file, mp4_file, data_rate, xml_filename,
+                         drc_profile, dialogue_intelligence, dialogue_level):
     root = ET.Element("job_config")
 
     # Input
@@ -35,8 +36,8 @@ def create_xml_5_1_atmos(output_path, atmos_file, mp4_file, data_rate, xml_filen
     loudness = ET.SubElement(encode, "loudness")
     measure = ET.SubElement(loudness, "measure_only")
     ET.SubElement(measure, "metering_mode").text = "1770-4"
-    ET.SubElement(measure, "dialogue_intelligence").text = "false"
-    ET.SubElement(measure, "speech_threshold").text = str(80)
+    ET.SubElement(measure, "dialogue_intelligence").text = str(dialogue_intelligence)
+    ET.SubElement(measure, "speech_threshold").text = str(15)
     ET.SubElement(encode, "data_rate").text = str(data_rate)
     ET.SubElement(encode, "timecode_frame_rate").text = "23.976"
     ET.SubElement(encode, "start").text = "first_frame_of_action"
@@ -46,8 +47,8 @@ def create_xml_5_1_atmos(output_path, atmos_file, mp4_file, data_rate, xml_filen
     ET.SubElement(encode, "append_silence_duration").text = str(0.0)
 
     drc = ET.SubElement(encode, "drc")
-    ET.SubElement(drc, "line_mode_drc_profile").text = "film_light"
-    ET.SubElement(drc, "rf_mode_drc_profile").text = "film_light"
+    ET.SubElement(drc, "line_mode_drc_profile").text = drc_profile
+    ET.SubElement(drc, "rf_mode_drc_profile").text = drc_profile
 
     downmix = ET.SubElement(encode, "downmix")
     ET.SubElement(downmix, "loro_center_mix_level").text = str(0)
@@ -60,7 +61,7 @@ def create_xml_5_1_atmos(output_path, atmos_file, mp4_file, data_rate, xml_filen
     ET.SubElement(trims, "surround_trim_5_1").text = str(0)
     ET.SubElement(trims, "height_trim_5_1").text = str(-3)
 
-    ET.SubElement(encode, "custom_dialnorm").text = str(0)
+    ET.SubElement(encode, "custom_dialnorm").text = str(dialogue_level)
 
     # Output
     output_elem = ET.SubElement(root, "output")
@@ -88,7 +89,8 @@ def create_xml_5_1_atmos(output_path, atmos_file, mp4_file, data_rate, xml_filen
 
     print_saved_xml(xml_file_path)
 
-def create_xml_7_1_atmos(output_path, atmos_file, mp4_file, data_rate, xml_filename):
+def create_xml_7_1_atmos(output_path, atmos_file, mp4_file, data_rate, xml_filename,
+                         drc_profile, dialogue_intelligence, dialogue_level):
     root = ET.Element("job_config")
 
     # Input
@@ -111,8 +113,8 @@ def create_xml_7_1_atmos(output_path, atmos_file, mp4_file, data_rate, xml_filen
     loudness = ET.SubElement(encode, "loudness")
     measure = ET.SubElement(loudness, "measure_only")
     ET.SubElement(measure, "metering_mode").text = "1770-4"
-    ET.SubElement(measure, "dialogue_intelligence").text = "false"
-    ET.SubElement(measure, "speech_threshold").text = str(100)
+    ET.SubElement(measure, "dialogue_intelligence").text = str(dialogue_intelligence)
+    ET.SubElement(measure, "speech_threshold").text = str(15)
 
     ET.SubElement(encode, "data_rate").text = str(data_rate)
     ET.SubElement(encode, "timecode_frame_rate").text = "23.976"
@@ -123,8 +125,8 @@ def create_xml_7_1_atmos(output_path, atmos_file, mp4_file, data_rate, xml_filen
     ET.SubElement(encode, "append_silence_duration").text = str(0.0)
 
     drc = ET.SubElement(encode, "drc")
-    ET.SubElement(drc, "line_mode_drc_profile").text = "film_light"
-    ET.SubElement(drc, "rf_mode_drc_profile").text = "film_light"
+    ET.SubElement(drc, "line_mode_drc_profile").text = drc_profile
+    ET.SubElement(drc, "rf_mode_drc_profile").text = drc_profile
 
     downmix = ET.SubElement(encode, "downmix")
     ET.SubElement(downmix, "loro_center_mix_level").text = str(0)
@@ -137,7 +139,7 @@ def create_xml_7_1_atmos(output_path, atmos_file, mp4_file, data_rate, xml_filen
     ET.SubElement(trims, "surround_trim_5_1").text = str(0)
     ET.SubElement(trims, "height_trim_5_1").text = str(-3)
 
-    ET.SubElement(encode, "custom_dialnorm").text = str(0)
+    ET.SubElement(encode, "custom_dialnorm").text = str(dialogue_level)
     ET.SubElement(encode, "encoding_backend").text = "atmosprocessor"
     ET.SubElement(encode, "encoder_mode").text = "bluray"
 
@@ -167,7 +169,8 @@ def create_xml_7_1_atmos(output_path, atmos_file, mp4_file, data_rate, xml_filen
 
     print_saved_xml(xml_file_path)
 
-def create_xml_5_1(output_path, wav_file, ec3_file, data_rate, xml_filename):
+def create_xml_5_1(output_path, wav_file, ec3_file, data_rate, xml_filename,
+                         drc_profile, dialogue_intelligence, dialogue_level):
     root = ET.Element("job_config")
 
     # Input
@@ -191,8 +194,8 @@ def create_xml_5_1(output_path, wav_file, ec3_file, data_rate, xml_filename):
     loudness = ET.SubElement(pcm, "loudness")
     measure_only = ET.SubElement(loudness, "measure_only")
     ET.SubElement(measure_only, "metering_mode").text = "1770-3"
-    ET.SubElement(measure_only, "dialogue_intelligence").text = "true"
-    ET.SubElement(measure_only, "speech_threshold").text = "20"
+    ET.SubElement(measure_only, "dialogue_intelligence").text = str(dialogue_intelligence)
+    ET.SubElement(measure_only, "speech_threshold").text = str(15)
 
     # Encoder settings
     ET.SubElement(pcm, "encoder_mode").text = "ddp"
@@ -212,11 +215,11 @@ def create_xml_5_1(output_path, wav_file, ec3_file, data_rate, xml_filename):
 
     # DRC
     drc = ET.SubElement(pcm, "drc")
-    ET.SubElement(drc, "line_mode_drc_profile").text = "music_light"
-    ET.SubElement(drc, "rf_mode_drc_profile").text = "music_light"
+    ET.SubElement(drc, "line_mode_drc_profile").text = drc_profile
+    ET.SubElement(drc, "rf_mode_drc_profile").text = drc_profile
 
     # Extra
-    ET.SubElement(pcm, "custom_dialnorm").text = "0"
+    ET.SubElement(pcm, "custom_dialnorm").text = str(dialogue_level)
     ET.SubElement(pcm, "lfe_lowpass_filter").text = "true"
     ET.SubElement(pcm, "surround_90_degree_phase_shift").text = "false"
     ET.SubElement(pcm, "surround_3db_attenuation").text = "false"
