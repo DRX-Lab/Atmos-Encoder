@@ -6,7 +6,7 @@
 
 ## ⚠️ Important Notice
 
-> This project contains test files adapted from the **truehdd** project. Source material has been modified to enable conversion to Dolby Digital Plus Atmos format.
+> This project uses test files adapted from the **truehdd** project. Source material has been modified to enable conversion to Dolby Digital Plus Atmos format.
 
 ---
 
@@ -18,7 +18,7 @@ The encoder automatically detects whether the input `.thd` file contains Atmos a
 * Dolby Digital Plus 7.1 with Atmos (`_atmos_7_1.mp4`)
 * Or both, depending on the chosen mode.
 
-If no Atmos is detected, it creates a standard 5.1 DDP file. In this case, **FFmpeg/FFprobe are used to resample the decoded WAV to 48 kHz PCM** to ensure DEE compatibility.
+If no Atmos is detected, it creates a standard 5.1 DDP file. For non-Atmos streams, **FFmpeg/FFprobe are used to resample the decoded WAV to 48 kHz PCM** for DEE compatibility.
 
 ---
 
@@ -32,7 +32,8 @@ If no Atmos is detected, it creates a standard 5.1 DDP file. In this case, **FFm
 * Cross-platform support (Windows/Linux/macOS)
 * Live progress bars for both DEE and FFmpeg processing
 * Automatic file organization and cleanup in `ddp_encode` output folder
-* FFmpeg/FFprobe required **only for non-Atmos streams**
+* FFmpeg/FFprobe required only for non-Atmos streams
+* Recommended DEE version: **5.2.1**
 
 ---
 
@@ -40,7 +41,7 @@ If no Atmos is detected, it creates a standard 5.1 DDP file. In this case, **FFm
 
 * `truehdd.exe` / `truehdd` (placed in `binaries/`)
 * `dee.exe` / `dee` and other Dolby Encoding Engine binaries (**not included** due to licensing)
-* `ffmpeg` / `ffprobe` (only needed for non-Atmos streams)
+* `ffmpeg` / `ffprobe` (only required for non-Atmos streams)
 * Python 3.7+
 * Python module `colorama` (`pip install colorama`)
 
@@ -56,15 +57,18 @@ python main.py -i input_file.thd -ba 1024 -b7 1536 -am both -w normal -bc
 
 ### Main Parameters
 
-| Parameter                    | Description                     | Default | Allowed Values                     |
-| ---------------------------- | ------------------------------- | ------- | ---------------------------------- |
-| `-i`, `--input`              | Input `.thd` file path          | *req.*  | Any `.thd` file                    |
-| `-bd`, `--bitrate-ddp`       | Bitrate for fallback DDP 5.1    | 1024    | 256, 384, 448, 640, 1024           |
-| `-ba`, `--bitrate-atmos-5-1` | Bitrate for Atmos 5.1           | 1024    | 384, 448, 576, 640, 768, 1024      |
-| `-b7`, `--bitrate-atmos-7-1` | Bitrate for Atmos 7.1           | 1536    | 1152, 1280, 1536, 1664             |
-| `-am`, `--atmos-mode`        | Select Atmos output mode        | both    | 5.1, 7.1, both                     |
-| `-w`, `--warp-mode`          | Warp mode                       | normal  | normal, warping, prologiciix, loro |
-| `-bc`, `--bed-conform`       | Enable bed conform (Atmos only) | enabled | toggle (default enabled)           |
+| Parameter                        | Description                                   | Default | Allowed Values                                                           |
+| -------------------------------- | --------------------------------------------- | ------- | ------------------------------------------------------------------------ |
+| `-i`, `--input`                  | Input `.thd` file path                        | *req.*  | Any `.thd` file                                                          |
+| `-bd`, `--bitrate-ddp`           | Bitrate for fallback DDP 5.1                  | 1024    | 256, 384, 448, 640, 1024                                                 |
+| `-ba`, `--bitrate-atmos-5-1`     | Bitrate for Atmos 5.1                         | 1024    | 384, 448, 576, 640, 768, 1024                                            |
+| `-b7`, `--bitrate-atmos-7-1`     | Bitrate for Atmos 7.1                         | 1536    | 1152, 1280, 1536, 1664                                                   |
+| `-am`, `--atmos-mode`            | Select Atmos output mode                      | both    | 5.1, 7.1, both                                                           |
+| `-w`, `--warp-mode`              | Warp mode                                     | normal  | normal, warping, prologiciix, loro                                       |
+| `-bc`, `--bed-conform`           | Enable bed conform (Atmos only)               | enabled | toggle (default enabled)                                                 |
+| `-d`, `--drc`                    | Dynamic Range Control profile                 | none    | film\_standard, film\_light, music\_standard, music\_light, speech, none |
+| `-di`, `--dialogue-intelligence` | Enable Dialogue Intelligence                  | true    | true, false                                                              |
+| `-nd`, `--disable-dbfs`          | Disable retrieving Dialogue Level from TrueHD | false   | toggle                                                                   |
 
 ---
 
@@ -74,12 +78,18 @@ python main.py -i input_file.thd -ba 1024 -b7 1536 -am both -w normal -bc
 
 ```text
 [INFO] Input file: input_atmos.thd
+[INFO] Verifying required binaries...
+[VERSION] DEE Encoder: 5.2.1
+[OK] All required binaries found.
 [INFO] Analyzing TrueHD stream...
-[INFO] Dolby Atmos detected.
-[INFO] Selected bitrates and warp mode:
-  Atmos 5.1 bitrate: 1024 kbps
-  Atmos 7.1 bitrate: 1536 kbps
-  Warp mode: normal
+[INFO] Selected audio settings:
+Atmos 5.1 bitrate         → 1024 kbps
+Atmos 7.1 bitrate         → 1536 kbps
+Dialogue Level            → -31 dB
+Dialogue Intelligence     → true
+DRC profile               → none
+Last Presentation         → 3
+Warp mode                 → normal
 [INFO] Starting decoding...
 ████████████████████████████████ 2971927/2971927 frames (100%)
 speed: 20.2x | timestamp: 00:00:00.000 | elapsed: 00:00:00
@@ -100,11 +110,16 @@ speed: 20.2x | timestamp: 00:00:00.000 | elapsed: 00:00:00
 
 ```text
 [INFO] Input file: input_non_atmos.thd
+[INFO] Verifying required binaries...
+[VERSION] DEE Encoder: 5.2.1
+[OK] All required binaries found.
 [INFO] Analyzing TrueHD stream...
-[INFO] Dolby Atmos not present.
-[INFO] Last Presentation found: 2
-[INFO] Selected bitrates and warp mode:
-  DDP 5.1 bitrate: 1024 kbps
+[INFO] Selected audio settings:
+Dialogue Level            → -31 dB
+Dialogue Intelligence     → true
+DDP 5.1 bitrate           → 1024 kbps
+DRC profile               → none
+Last Presentation         → 2
 [INFO] Starting decoding...
 ████████████████████████████████████████ 7831200/7831200 frames (100%)
 speed: 20.2x | timestamp: 00:00:00.000 | elapsed: 00:00:00
@@ -131,7 +146,8 @@ speed: 20.2x | timestamp: 00:00:00.000 | elapsed: 00:00:00
 
 ### Dolby Encoding Engine (DEE) package
 
-*Note: These proprietary binaries are not included due to licensing restrictions.*
+> **Recommended version:** 5.2.1
+> *Note: Proprietary binaries are not included due to licensing restrictions.*
 
 * `dee.exe` / `dee`
 * `license.lic`
