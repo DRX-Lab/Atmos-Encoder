@@ -149,6 +149,21 @@ def remove_files(folder: str, extensions: Iterable[str]) -> None:
                 pass
 
 
+def cleanup_atmos_artifacts_if_needed(atmos_mode: str, after: str) -> None:
+    """
+    Removes Atmos intermediate artifacts depending on the selected mode.
+
+    Rules:
+      - atmos_mode == "5.1"  -> remove after 5.1 encode completes
+      - atmos_mode == "7.1"  -> remove after 7.1 encode completes
+      - atmos_mode == "both" -> remove only after 7.1 encode completes
+    """
+    if atmos_mode == after or (atmos_mode == "both" and after == "7.1"):
+        info("Removing Atmos intermediate files...")
+        remove_files(OUTPUT_DIR, ATMOS_EXTS)
+        ok("Atmos intermediate files removed.")
+
+
 # ---------------------------------------------------------------------
 # Tool validation
 # ---------------------------------------------------------------------
@@ -513,6 +528,9 @@ def encode_atmos_ddp(
         )
         ok(f"Saved: {final_5_1}")
 
+        # Cleanup Atmos artifacts depending on mode
+        cleanup_atmos_artifacts_if_needed(args.atmos_mode, after="5.1")
+
     if args.atmos_mode in ("7.1", "both"):
         out_7_1 = f"{hex_id}_atmos_7_1.eac3"
         out_7_1_fix = f"{hex_id}_atmos_7_1_fix.eac3"
@@ -554,6 +572,9 @@ def encode_atmos_ddp(
             os.path.join(OUTPUT_DIR, final_7_1),
         )
         ok(f"Saved: {final_7_1}")
+
+        # Cleanup Atmos artifacts depending on mode (always after 7.1 for "both")
+        cleanup_atmos_artifacts_if_needed(args.atmos_mode, after="7.1")
 
     for xml_abs in cleanup_xml:
         try:
