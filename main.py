@@ -591,18 +591,20 @@ def main() -> None:
     args = parse_args()
     tools = Tools.load()
 
-    if not os.path.isfile(args.input):
-        die(f"Input must be a file: {args.input}")
+    input_abs = os.path.abspath(args.input)
 
-    input_name = os.path.basename(args.input)
+    if not os.path.isfile(input_abs):
+        die(f"Input must be a file: {input_abs}")
+
+    input_name = os.path.basename(input_abs)
     if not input_name.lower().endswith((".thd", ".mlp")):
         die("Unsupported file type. Provide .thd or .mlp (Atmos).")
 
-    base_name, hex_id = compute_run_ids(args.input)
+    base_name, hex_id = compute_run_ids(input_abs)
     work_dir = ensure_work_dir(hex_id)
 
     try:
-        stream = StreamInfo.from_truehdd_info(tools.truehdd, args.input, args.disable_dbfs)
+        stream = StreamInfo.from_truehdd_info(tools.truehdd, input_abs, args.disable_dbfs)
     except subprocess.CalledProcessError as e:
         die(f"TrueHDD info failed: {e}")
 
@@ -613,7 +615,7 @@ def main() -> None:
 
     decode_truehd_atmos_only(
         tools=tools,
-        input_file=args.input,
+        input_file=input_abs,
         stream=stream,
         work_dir=work_dir,
         hex_id=hex_id,
@@ -622,6 +624,10 @@ def main() -> None:
 
     encode_atmos_ddp(tools, args, stream, hex_id, base_name)
 
+    try:
+        os.rmdir(work_dir)
+    except OSError:
+        pass
 
 if __name__ == "__main__":
     main()
